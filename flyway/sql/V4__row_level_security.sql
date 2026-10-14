@@ -1,0 +1,7 @@
+ALTER TABLE app_users ENABLE ROW LEVEL SECURITY; ALTER TABLE products ENABLE ROW LEVEL SECURITY; ALTER TABLE orders ENABLE ROW LEVEL SECURITY; ALTER TABLE order_items ENABLE ROW LEVEL SECURITY; ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_users FORCE ROW LEVEL SECURITY; ALTER TABLE products FORCE ROW LEVEL SECURITY; ALTER TABLE orders FORCE ROW LEVEL SECURITY; ALTER TABLE order_items FORCE ROW LEVEL SECURITY; ALTER TABLE audit_log FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_isolation_users ON app_users USING (tenant_id=nullif(current_setting('app.tenant_id',true),'')::uuid) WITH CHECK (tenant_id=nullif(current_setting('app.tenant_id',true),'')::uuid);
+CREATE POLICY tenant_isolation_products ON products USING (tenant_id=nullif(current_setting('app.tenant_id',true),'')::uuid) WITH CHECK (tenant_id=nullif(current_setting('app.tenant_id',true),'')::uuid);
+CREATE POLICY tenant_isolation_orders ON orders USING (tenant_id=nullif(current_setting('app.tenant_id',true),'')::uuid) WITH CHECK (tenant_id=nullif(current_setting('app.tenant_id',true),'')::uuid);
+CREATE POLICY tenant_isolation_order_items ON order_items USING (tenant_id=nullif(current_setting('app.tenant_id',true),'')::uuid) WITH CHECK (tenant_id=nullif(current_setting('app.tenant_id',true),'')::uuid);
+CREATE POLICY tenant_isolation_audit ON audit_log USING (tenant_id=nullif(current_setting('app.tenant_id',true),'')::uuid) WITH CHECK (tenant_id=nullif(current_setting('app.tenant_id',true),'')::uuid);
