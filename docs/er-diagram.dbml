@@ -1,0 +1,66 @@
+Project CommerceCapstone {
+  database_type: 'PostgreSQL'
+  Note: 'Multi-tenant commerce orders; review before schema approval.'
+}
+Table tenants {
+  id uuid [pk]
+  name varchar(160) [not null]
+  created_at timestamptz [not null]
+}
+Table app_users {
+  id uuid [pk]
+  tenant_id uuid [not null, ref: > tenants.id]
+  email varchar(320) [not null]
+  password_hash text [not null]
+  role varchar(30) [not null]
+  created_at timestamptz [not null]
+  Indexes { (tenant_id, email) [unique] }
+}
+Table products {
+  id uuid [pk]
+  tenant_id uuid [not null, ref: > tenants.id]
+  sku varchar(80) [not null]
+  name varchar(200) [not null]
+  description text
+  price numeric(12,2) [not null]
+  stock_qty integer [not null]
+  active boolean [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  Indexes { (tenant_id, sku) [unique] }
+}
+Table orders {
+  id uuid [pk]
+  tenant_id uuid [not null, ref: > tenants.id]
+  customer_id uuid [not null, ref: > app_users.id]
+  status varchar(20) [not null]
+  total_amount numeric(12,2) [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+Table order_items {
+  id uuid [pk]
+  tenant_id uuid [not null, ref: > tenants.id]
+  order_id uuid [not null, ref: > orders.id]
+  product_id uuid [not null, ref: > products.id]
+  quantity integer [not null]
+  unit_price numeric(12,2) [not null]
+}
+Table audit_log {
+  id bigint [pk, increment]
+  tenant_id uuid [not null, ref: > tenants.id]
+  table_name text [not null]
+  record_id uuid [not null]
+  operation varchar(10) [not null]
+  changed_at timestamptz [not null]
+  changed_by text
+  old_row jsonb
+  new_row jsonb
+}
+Ref: tenants.id < app_users.tenant_id
+Ref: tenants.id < products.tenant_id
+Ref: tenants.id < orders.tenant_id
+Ref: app_users.id < orders.customer_id
+Ref: orders.id < order_items.order_id
+Ref: products.id < order_items.product_id
+Ref: tenants.id < order_items.tenant_id
